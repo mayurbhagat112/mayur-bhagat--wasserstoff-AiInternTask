@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Analysis Chatbot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row vh-100">
+            <!-- Documents Panel -->
+            <div class="col-md-3 documents-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-file-alt"></i> Documents</h3>
+                </div>
+                <div class="document-list">
+                    <div class="document-filters">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" placeholder="Search documents...">
+                        </div>
+                    </div>
+                    <div class="document-items">
+                        <!-- Document items will be dynamically populated -->
+                        <div class="empty-state text-center py-4">
+                            <i class="fas fa-file-alt text-muted mb-3" style="font-size: 2rem;"></i>
+                            <p class="text-muted">No documents uploaded yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Panel -->
+            <div class="col-md-6 chat-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-comments"></i> Chat</h3>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="welcome-message">
+                        <div class="message bot-message">
+                            <p>Welcome to Theme Weaver! 👋</p>
+                            <p>Upload your documents and I'll help you analyze them. You can ask questions about the content, and I'll provide answers with relevant citations.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <form id="chatForm">
+                        <div class="input-group">
+                            <button type="button" class="btn btn-link upload-pin" id="toggleUpload" title="Upload Documents">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <input type="text" class="form-control" id="userInput" placeholder="Type your question here..." autocomplete="off">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <!-- Upload Options Menu -->
+                    <div class="upload-options" id="uploadOptions" style="display: none;">
+                        <div class="upload-option" data-type="document">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Document</span>
+                        </div>
+                        <div class="upload-option" data-type="pdf">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>PDF</span>
+                        </div>
+                        <div class="upload-option" data-type="text">
+                            <i class="fas fa-file-lines"></i>
+                            <span>Text</span>
+                        </div>
+                    </div>
+                    <!-- Document Upload Section -->
+                    <div class="document-upload" id="dropZone" style="display: none;">
+                        <div class="document-upload-header">
+                            <h4>Upload Documents</h4>
+                            <button type="button" class="btn-close" id="closeUpload"></button>
+                        </div>
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag and drop your files here or</p>
+                            <form id="uploadForm" enctype="multipart/form-data">
+                                <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" style="display: none;">
+                                <button type="button" class="btn" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-folder-open me-2"></i>Browse Files
+                                </button>
+                            </form>
+                            <p class="mt-2 small text-muted">Supported formats: PDF, DOC, DOCX, TXT</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="col-md-3 results-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-chart-bar"></i> Results</h3>
+                </div>
+                <div class="results-content">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="themes">
+                            <i class="fas fa-layer-group me-2"></i>Themes
+                        </button>
+                        <button class="tab-btn" data-tab="documents">
+                            <i class="fas fa-file-alt me-2"></i>Documents
+                        </button>
+                    </div>
+                    <div class="tab-content">
+                        <div id="themes" class="tab-pane active">
+                            <div class="empty-state text-center py-4">
+                                <i class="fas fa-layer-group text-muted mb-3" style="font-size: 2rem;"></i>
+                                <p class="text-muted">Themes will appear here after your first query</p>
+                            </div>
+                        </div>
+                        <div id="documents" class="tab-pane">
+                            <div class="empty-state text-center py-4">
+                                <i class="fas fa-file-alt text-muted mb-3" style="font-size: 2rem;"></i>
+                                <p class="text-muted">Document results will appear here after your first query</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Progress Modal -->
+    <div class="modal fade" id="uploadProgressModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Uploading Documents</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="progress mb-3">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-center mb-0" id="uploadStatus">Preparing upload...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,1 +1,12 @@
-
+#dependencis
+langchain
+fastapi
+uvicorn[standard]
+faiss-cpu
+PyMuPDF
+pytesseract
+sentence-transformers
+httpx
+python-multipart
+flask
+requests
